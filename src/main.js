@@ -123,10 +123,7 @@ ${artikelMap[h.zeile].text}
 `;
   }
 
-  prompt += "
---- GPT-PROMPT ---
-
-";
+  prompt += `\n--- GPT-PROMPT ---\n\n`;
 
   try {
     const res = await fetch(API_BASE + "?action=getVorlagePrompt");
