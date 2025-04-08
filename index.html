@@ -1,12 +1,28 @@
+
 <!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mittagsupdate-Promptgenerator</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>Mittagsupdate-Promptgenerator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <img src="https://www.radioemscherlippe.de/assets/images/senderlogos/radio_emscher_lippe.png" alt="Logo" />
+    <h1>Mittagsupdate-Promptgenerator</h1>
+  </header>
+
+  <div class="container">
+    <div class="name-field">
+      <label for="autorName"><strong>Name für Prompt:</strong></label>
+      <input type="text" id="autorName" placeholder="z. B. Annika Boenigk" />
+    </div>
+
+    <div id="app">Artikel werden hier geladen…</div>
+
+    <button onclick="generatePrompt()">Prompt generieren</button>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
 </html>
