@@ -1,28 +1,49 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
   <title>Mittagsupdate-Promptgenerator</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
   <header>
     <img src="https://www.radioemscherlippe.de/assets/images/senderlogos/radio_emscher_lippe.png" alt="Logo" />
     <h1>Mittagsupdate-Promptgenerator</h1>
   </header>
-
   <div class="container">
+    <div class="top-buttons">
+      <button id="aktualisierenBtn">Artikel aktualisieren</button>
+      <button id="generierenBtn">Prompt generieren</button>
+    </div>
+
     <div class="name-field">
       <label for="autorName"><strong>Name für Prompt:</strong></label>
       <input type="text" id="autorName" placeholder="z. B. Annika Boenigk" />
     </div>
 
-    <div id="app">Artikel werden hier geladen…</div>
+    <div id="app">Artikel werden geladen…</div>
 
-    <button onclick="generatePrompt()">Prompt generieren</button>
+    <div class="top-buttons">
+      <button id="aktualisierenBtnBottom">Artikel aktualisieren</button>
+      <button id="generierenBtnBottom">Prompt generieren</button>
+    </div>
   </div>
 
-  <script type="module" src="main.js"></script>
+  <dialog id="promptDialog">
+    <div class="modal-header">
+      <span>📄 Vorschau: Mittagsupdate-Prompt</span>
+      <button id="dialogClose">✖</button>
+    </div>
+    <div class="modal-body">
+      <pre id="promptText"></pre>
+    </div>
+    <div class="modal-footer">
+      <button id="copyBtn">In Zwischenablage kopieren</button>
+      <button id="dialogCloseBottom">Schließen</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>
