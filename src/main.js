@@ -1,132 +1,84 @@
-const API_BASE = "https://script.google.com/macros/s/AKfycbx3hfePMrOb_XUArEGdG-_8XVqicJxMu5mmUyzNvcApEbnO2rgK0DQdFzWID9yugYGH/exec";
-
 let daten = [];
 let letzterPrompt = "";
-let vergebeneRollen = {};
 
-document.title = "Mittagsupdate-Promptgenerator";
-
-document.addEventListener("DOMContentLoaded", () => {
-  ladeArtikel();
-  document.getElementById("aktualisierenBtn").onclick = aktualisiereArtikel;
-  document.getElementById("aktualisierenBtnBottom").onclick = aktualisiereArtikel;
-  document.getElementById("generierenBtn").onclick = absenden;
-  document.getElementById("generierenBtnBottom").onclick = absenden;
-  document.getElementById("dialogClose").onclick = () => dialog().close();
-  document.getElementById("dialogCloseBottom").onclick = () => dialog().close();
-  document.getElementById("copyBtn").onclick = copyPrompt;
-});
-
-function dialog() {
-  return document.getElementById("promptDialog");
-}
-
-async function ladeArtikel() {
+export async function ladeArtikel() {
   const app = document.getElementById("app");
+  app.innerHTML = "⏳ Lade Artikel...";
   try {
-    const res = await fetch(API_BASE + "?action=getArtikelListe");
+    const res = await fetch("/api/artikel");
     daten = await res.json();
-    if (!daten.length) {
-      app.innerHTML = "<p>Keine Artikel gefunden.</p>";
-      return;
-    }
-
-    app.innerHTML = '<div class="artikel-grid">' + daten.map((a, i) => `
-      <div class="card">
-        <strong>${a.titel}</strong>
-        <div class="artikel-teaser">${a.text.split("\n")[0]}</div>
-        <a href="${a.link}" target="_blank">Artikel ansehen</a>
-      </div>
-      <div class="card">
-        <label>Einordnen als:
-          <select id="rolle-${i}" onchange="rolleGeändert(${i})">
-            <option value="">Nicht verwenden</option>
-            <option value="1">1. Meldung</option>
-            <option value="2">2. Meldung</option>
-            <option value="3">3. Meldung</option>
-            <option value="H">Hintergrundstück</option>
-          </select>
-        </label>
-        <div id="warnung-${i}" style="color: red; font-size: 13px; display: none;"></div>
-        <label>Begründung (optional):
-          <textarea id="begruendung-${i}" rows="2"></textarea>
-        </label>
-      </div>`).join('') + '</div>';
-  } catch {
-    app.innerHTML = "<p>Fehler beim Laden der Artikel.</p>";
+    renderArtikel();
+  } catch (err) {
+    app.innerHTML = "❌ Fehler beim Laden der Artikel.";
   }
 }
 
-function rolleGeändert(index) {
-  vergebeneRollen = {};
-  daten.forEach((a, i) => {
-    const rolle = document.getElementById(`rolle-${i}`).value;
-    if (rolle) {
-      if (!vergebeneRollen[rolle]) vergebeneRollen[rolle] = [];
-      vergebeneRollen[rolle].push(i);
-    }
-  });
-  daten.forEach((a, i) => {
-    const rolle = document.getElementById(`rolle-${i}`).value;
-    const warnung = document.getElementById(`warnung-${i}`);
-    if (rolle && vergebeneRollen[rolle].length > 1) {
-      warnung.innerText = `⚠️ Diese Einordnung wurde mehrfach vergeben.`;
-      warnung.style.display = "block";
-    } else {
-      warnung.innerText = "";
-      warnung.style.display = "none";
-    }
-  });
+function renderArtikel() {
+  const app = document.getElementById("app");
+  if (!daten.length) {
+    app.innerHTML = "<p>Keine Artikel gefunden.</p>";
+    return;
+  }
+
+  app.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">' + daten.map((a, i) => \`
+    <div style="background:#edeeef;padding:15px;border-radius:8px;">
+      <strong>\${a.titel}</strong>
+      <p>\${a.text.split("\n")[0]}</p>
+      <a href="\${a.link}" target="_blank">Artikel ansehen</a>
+      <select id="rolle-\${i}">
+        <option value="">Nicht verwenden</option>
+        <option value="1">1. Meldung</option>
+        <option value="2">2. Meldung</option>
+        <option value="3">3. Meldung</option>
+        <option value="H">Hintergrundstück</option>
+      </select>
+      <textarea id="begruendung-\${i}" rows="2" placeholder="Begründung (optional)"></textarea>
+    </div>
+  \`).join('') + '</div>';
 }
 
-function absenden() {
-  const rollenMap = {};
-  const auswahl = daten.map((a, i) => {
-    const rolle = document.getElementById(`rolle-${i}`).value;
-    const begruendung = document.getElementById(`begruendung-${i}`).value;
-    if (rolle) {
-      if (rolle !== "H" && rollenMap[rolle]) return null;
-      if (rolle === "H" && rollenMap["H"]) return null;
-      rollenMap[rolle] = true;
-    }
-    return { zeile: a.id, rolle, begruendung };
-  });
-  if (auswahl.includes(null)) return;
-  zeigePromptvorschau(auswahl.filter(e => e.rolle));
-}
+window.ladeArtikel = ladeArtikel;
 
-async function zeigePromptvorschau(rollen) {
+window.generierePrompt = async function () {
   const name = document.getElementById("autorName").value || "Unbekannt";
-  const datum = new Date().toLocaleDateString("de-DE");
+  let rollen = [];
+  daten.forEach((a, i) => {
+    const rolle = document.getElementById("rolle-" + i).value;
+    const begruendung = document.getElementById("begruendung-" + i).value;
+    if (rolle) rollen.push({ ...a, rolle, begruendung });
+  });
 
-  let prompt = `Datum: ${datum}
-Name: ${name}
+  let prompt = \`Datum: \${new Date().toLocaleDateString('de-DE')}
+Name: \${name}
 
-`;
-  const artikelMap = {};
-  daten.forEach((a, i) => artikelMap[a.id] = a);
+\`;
 
   ["1", "2", "3"].forEach(r => {
-    const entry = rollen.find(e => e.rolle === r);
-    if (entry) prompt += `# ${r}. Meldung: ${artikelMap[entry.zeile].titel}
-${artikelMap[entry.zeile].text}
+    const eintrag = rollen.find(e => e.rolle === r);
+    if (eintrag) {
+      prompt += \`# \${r}. Meldung: \${eintrag.titel}
+\${eintrag.text}
 
-`;
+\`;
+    }
   });
 
   const h = rollen.find(e => e.rolle === "H");
   if (h) {
-    prompt += `# Hintergrund: ${artikelMap[h.zeile].titel}
-${artikelMap[h.zeile].text}
-`;
-    if (h.begruendung) prompt += `Begründung: ${h.begruendung}
-`;
+    prompt += \`# Hintergrund: \${h.titel}
+\${h.text}
+\`;
+    if (h.begruendung) {
+      prompt += \`Begründung: \${h.begruendung}
+\`;
+    }
+    prompt += "\n";
   }
 
-  prompt += `\n--- GPT-PROMPT ---\n\n`;
+  prompt += "--- GPT-PROMPT ---\n\n";
 
   try {
-    const res = await fetch(API_BASE + "?action=getVorlagePrompt");
+    const res = await fetch("/api/vorlage");
     const vorlage = await res.text();
     prompt += vorlage;
   } catch {
@@ -134,18 +86,18 @@ ${artikelMap[h.zeile].text}
   }
 
   letzterPrompt = prompt;
+
   document.getElementById("promptText").textContent = prompt;
-  dialog().showModal();
+  document.getElementById("promptDialog").showModal();
+};
+
+window.schließen = function () {
+  document.getElementById("promptDialog").close();
 }
 
-function copyPrompt() {
-  navigator.clipboard.writeText(letzterPrompt).then(() => {
-    alert("📋 Prompt wurde in die Zwischenablage kopiert!");
-  });
+window.copyPrompt = function () {
+  navigator.clipboard.writeText(letzterPrompt)
+    .then(() => alert("📋 Prompt wurde kopiert!"));
 }
 
-async function aktualisiereArtikel() {
-  document.getElementById("app").innerHTML = "⏳ Lade aktuelle Artikel...";
-  await fetch(API_BASE + "?action=feedNachArtikelUebertragen");
-  ladeArtikel();
-}
+ladeArtikel();
