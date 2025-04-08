@@ -1,7 +1,8 @@
-
 export default async function handler(req, res) {
   const targetUrl = req.query.url;
-  if (!targetUrl) return res.status(400).send("Missing URL");
+  if (!targetUrl) {
+    return res.status(400).send("❌ Fehlende URL");
+  }
 
   try {
     const response = await fetch(decodeURIComponent(targetUrl));
@@ -12,6 +13,6 @@ export default async function handler(req, res) {
     const data = await response.text();
     res.status(200).send(data);
   } catch (error) {
-    res.status(500).send("Error: " + error.toString());
+    res.status(500).send("❌ Fehler: " + error.toString());
   }
 }
