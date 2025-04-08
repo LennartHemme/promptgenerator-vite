@@ -1,23 +1,63 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mittagsupdate-Promptgenerator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <img src="https://www.radioemscherlippe.de/assets/images/senderlogos/radio_emscher_lippe.png" alt="Logo" height="50">
+    <img src="https://www.radioemscherlippe.de/assets/images/senderlogos/radio_emscher_lippe.png" alt="Logo" />
     <h1>Mittagsupdate-Promptgenerator</h1>
   </header>
+
   <div class="container">
-    <input id="autorName" placeholder="Name für Prompt" />
-    <button onclick="generatePrompt()">Prompt generieren</button>
-    <pre id="preview"></pre>
-    <button onclick="copyPrompt()">📋 Kopieren</button>
+    <div class="top-buttons">
+      <button onclick="updateArticles()">Artikel aktualisieren</button>
+      <button onclick="generatePrompt()">Prompt generieren</button>
+    </div>
+
+    <div class="name-field">
+      <label for="autorName"><strong>Name für Prompt:</strong></label>
+      <input type="text" id="autorName" placeholder="z. B. Annika Boenigk" />
+    </div>
+
+    <div id="app">
+      <div class="artikel-grid">
+        <div class="card">
+          <strong>Beispielartikel: Gladbeck</strong>
+          <div class="artikel-teaser">Teasertext für Artikel Gladbeck</div>
+          <a href="#">Artikel ansehen</a>
+        </div>
+        <div class="card">
+          <strong>Beispielartikel: Bottrop</strong>
+          <div class="artikel-teaser">Teasertext für Artikel Bottrop</div>
+          <a href="#">Artikel ansehen</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="top-buttons">
+      <button onclick="updateArticles()">Artikel aktualisieren</button>
+      <button onclick="generatePrompt()">Prompt generieren</button>
+    </div>
   </div>
+
+  <dialog id="promptDialog">
+    <div class="modal-header">
+      <span>📄 Vorschau: Mittagsupdate-Prompt</span>
+      <button onclick="closeDialog()">✖</button>
+    </div>
+    <div class="modal-body">
+      <pre id="promptText"></pre>
+    </div>
+    <div class="modal-footer">
+      <button onclick="copyPrompt()">In Zwischenablage kopieren</button>
+      <button onclick="closeDialog()">Schließen</button>
+    </div>
+  </dialog>
+
   <script src="main.js"></script>
 </body>
 </html>

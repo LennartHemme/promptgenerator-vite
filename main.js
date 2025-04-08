@@ -1,12 +1,28 @@
+let letzterPrompt = "";
 
 function generatePrompt() {
   const name = document.getElementById("autorName").value || "Unbekannt";
-  const preview = document.getElementById("preview");
-  preview.textContent = "Prompt für " + name + ":\n\nHier steht dein Text.";
+  const prompt = `Datum: ${new Date().toLocaleDateString('de-DE')}
+Name: ${name}
+
+--- GPT-PROMPT ---
+
+[Prompt-Inhalt hier]`;
+  document.getElementById("promptText").textContent = prompt;
+  letzterPrompt = prompt;
+  document.getElementById("promptDialog").showModal();
 }
+
 function copyPrompt() {
-  const text = document.getElementById("preview").textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    alert("📋 Prompt kopiert!");
-  });
+  navigator.clipboard.writeText(letzterPrompt)
+    .then(() => alert("📋 Prompt wurde in die Zwischenablage kopiert!"))
+    .catch(() => alert("❌ Kopieren fehlgeschlagen."));
+}
+
+function closeDialog() {
+  document.getElementById("promptDialog").close();
+}
+
+function updateArticles() {
+  alert("Artikel aktualisieren ist in dieser Version noch nicht aktiv.");
 }
